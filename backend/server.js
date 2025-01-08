@@ -25,7 +25,7 @@ const server = app.listen(port, () => {
 const io = new Server(server, {
   path: "/tech_interview",
   cors: {
-    origin: "http://localhost:4200", // Cambia a localhost para pruebas locales
+    origin: "https://stage.allrideapp.com/tech_interview?room=", // Cambia a localhost para pruebas locales
     methods: ["GET", "POST"],
   },
 });
@@ -34,7 +34,7 @@ app.use(express.json());
 
 // Manejo de conexiones de Socket.io
 io.on("connection", (socket) => {
-  console.log("Un usuario se ha conectado uwu");
+  console.log("Un usuario se ha conectado ");
 
   const room = socket.handshake.query.room;
   if (room) {

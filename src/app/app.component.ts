@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { SocketService } from './socket.service';
+import { MapaComponent } from './mapa/mapa.component';
 
 @Component({
   selector: 'app-root',
@@ -12,14 +13,19 @@ export class AppComponent {
   markers: { lat: number; lng: number }[] = [];
   roomId: string = 'Damm2222'; // Reemplaza con el nombre de usuario de GitHub
 
+  @ViewChild(MapaComponent) mapaComponent!: MapaComponent;
+
   constructor(private socketService: SocketService) {
-    // Escuchar eventos de 'newLocation'
+    // Escuchar eventos de 'newLocation' para actualizar el map
     this.socketService.on('newLocation').subscribe((coords: any) => {
       this.markers.push(coords);
       console.log('AppComponent: Recibido nuevo marcador vía socket:', coords);
+
+      if (this.mapaComponent) {
+        this.mapaComponent.updateMapView();
+      }
     });
 
-    // Escuchar eventos de 'error' si decides manejar errores vía socket
     this.socketService.on('error').subscribe((errorMessage: any) => {
       console.error('AppComponent: Error recibido vía socket:', errorMessage);
       alert(errorMessage);
@@ -33,7 +39,6 @@ export class AppComponent {
       return;
     }
 
-    // Emitir 'geocodeAddress' al servidor vía socket
     this.socketService.emit('geocodeAddress', this.address);
     console.log('Evento geocodeAddress emitido:', this.address);
   }

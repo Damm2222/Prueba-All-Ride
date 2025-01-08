@@ -4,15 +4,15 @@ const { Server } = require("socket.io");
 const app = express();
 const port = 3000;
 
-// Clave de API de Google Maps (directa, para pruebas)
-const apiKey = "AIzaSyDqMOAzsn3Uict0o_Ij3DsntyKmgpgbEXk"; // REEMPLAZA con tu clave real
+// Clave de API de Google Maps
+const apiKey = "AIzaSyDqMOAzsn3Uict0o_Ij3DsntyKmgpgbEXk";
 
 // Iniciar el servidor HTTP
 const server = app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
 });
 
-// Configuración de Socket.io con la ruta '/tech_interview'
+// Configuración para pruebas con backend
 // const io = new Server(server, {
 //   path: "/tech_interview",
 //   cors: {
@@ -20,6 +20,8 @@ const server = app.listen(port, () => {
 //     methods: ["GET", "POST"],
 //   },
 // });
+/////////////
+//configuracion para pruebas locales
 const io = new Server(server, {
   path: "/tech_interview",
   cors: {
@@ -40,7 +42,6 @@ io.on("connection", (socket) => {
     console.log(`Usuario unido a la sala: ${room}`);
   }
 
-  // Manejar el evento 'geocodeAddress'
   socket.on("geocodeAddress", async (address) => {
     console.log("Geocodificando dirección:", address);
     const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
@@ -51,9 +52,7 @@ io.on("connection", (socket) => {
       const response = await axios.get(apiUrl);
       if (response.data.status === "OK" && response.data.results.length > 0) {
         const location = response.data.results[0].geometry.location;
-        // Emitir 'newLocation' al cliente que emitió la solicitud
         socket.emit("newLocation", location);
-        // Emitir 'newLocation' a otros clientes en la misma sala
         socket.to(room).emit("newLocation", location);
         console.log("Coordenadas emitidas:", location);
       } else {
@@ -71,14 +70,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Manejar el evento 'newLocation' si decides permitir que los clientes emitan directamente
   socket.on("newLocation", (coords) => {
     console.log("Coordenadas recibidas:", coords);
     if (room) {
-      // Emitir a todos los clientes en la misma sala excepto al que emitió
       socket.to(room).emit("newLocation", coords);
     } else {
-      // Emitir a todos los clientes excepto al que emitió
       socket.broadcast.emit("newLocation", coords);
     }
   });

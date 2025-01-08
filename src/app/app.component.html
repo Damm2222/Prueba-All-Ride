@@ -1,12 +1,18 @@
-<div style="text-align: center; margin-bottom: 20px">
-  <input
-    type="text"
-    placeholder="Ingresa una dirección"
-    [(ngModel)]="address"
-  />
-  <button (click)="geocodeAddress()">Enviar</button>
-  <!-- Botón de prueba (opcional) -->
-  <button (click)="emitTestEvent()">Emitir Evento de Prueba</button>
-</div>
+<div class="container mt-4">
+  <app-app-bar style="margin-top: 20px"></app-app-bar>
+  <!-- Ajusta el valor según tus necesidades -->
 
-<app-mapa [markers]="markers"></app-mapa>
+  <h1>Prueba Tecnica</h1>
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      [(ngModel)]="address"
+      placeholder="Ingrese una dirección"
+    />
+  </div>
+  <div class="mb-3">
+    <button class="btn btn-primary" (click)="geocodeAddress()">Buscar</button>
+  </div>
+  <app-mapa [markers]="markers"></app-mapa>
+</div>

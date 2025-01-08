@@ -9,18 +9,18 @@ export class SocketService {
   private socket: Socket;
 
   constructor() {
-    const githubUsername = 'Damm2222'; // Reemplaza con el nombre de usuario de GitHub
+    const githubUsername = 'Damm2222'; //Usar nombre de usuario de GitHub
     const roomId = githubUsername; // Usar el nombre de usuario como ID de sala
 
     // this.socket = io('https://stage.allrideapp.com', {
-    //   path: '/tech_interview', // Ruta configurada en el servidor
+    //   path: '/tech_interview',
     //   query: { room: roomId },
-    //   transports: ['websocket'], // Opcional: Forzar el uso de WebSocket
+    //   transports: ['websocket'],
     // });
     this.socket = io('http://localhost:3000', {
-      path: '/tech_interview', // Ruta configurada en el servidor
+      path: '/tech_interview',
       query: { room: roomId },
-      transports: ['websocket'], // Opcional: Forzar el uso de WebSocket
+      transports: ['websocket'],
     });
 
     this.socket.on('connect', () => {

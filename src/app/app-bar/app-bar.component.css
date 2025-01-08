@@ -1,0 +1,56 @@
+.app-bar {
+  width: 100%; /* Ocupar todo el ancho de la pantalla */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed; /* Fijar la barra en la parte superior */
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Para que quede siempre visible */
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #00a8f3;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 15px;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  font-size: 20px;
+  color: #9b9b9b;
+  transition: color 0.3s;
+}
+
+.nav-links li a:hover {
+  color: #00a8f3;
+}
+
+.contact-button {
+  background-color: #00a8f3;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.contact-button:hover {
+  background-color: #007bb5;
+}
+
+body {
+  margin: 0; /* Elimina el margen para evitar desalineaciones */
+  padding-top: 60px; /* Ajusta el padding para que el contenido no quede debajo del AppBar */
+}

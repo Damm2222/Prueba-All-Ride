@@ -5,7 +5,6 @@ import {
   OnChanges,
   SimpleChanges,
   ViewChild,
-  AfterViewInit,
 } from '@angular/core';
 import { GoogleMap } from '@angular/google-maps';
 
@@ -14,86 +13,102 @@ import { GoogleMap } from '@angular/google-maps';
   templateUrl: './mapa.component.html',
   styleUrls: ['./mapa.component.css'],
 })
-export class MapaComponent implements OnInit, OnChanges, AfterViewInit {
+export class MapaComponent implements OnInit, OnChanges {
   @Input() markers: { lat: number; lng: number }[] = [];
+  @ViewChild(GoogleMap, { static: false }) mapComponent!: GoogleMap;
 
-  @ViewChild(GoogleMap, { static: false }) map!: GoogleMap;
+  mapOptions: google.maps.MapOptions = {
+    center: { lat: -33.4489, lng: -70.6693 },
+    zoom: 12,
+  };
 
-  // Definir el centro inicial del mapa en Santiago de Chile
-  center: google.maps.LatLngLiteral = { lat: -33.4489, lng: -70.6693 }; // Coordenadas de Santiago de Chile
-  zoom = 12; // Nivel de zoom inicial
+  private gmap?: google.maps.Map;
 
-  constructor() {}
+  ngOnInit(): void {}
 
-  ngOnInit(): void {
-    // Configuraciones iniciales si es necesario
-  }
-
-  ngAfterViewInit(): void {
-    // Llamar a fitBounds después de un breve retraso para asegurar que el mapa y los marcadores están listos
-    setTimeout(() => {
+  /**
+   * Este método se llama cuando el mapa está completamente inicializado.
+   * @param map La instancia real de google.maps.Map
+   */
+  onMapReady(map: google.maps.Map): void {
+    console.log('Mapa inicializado', map);
+    this.gmap = map;
+    if (this.markers.length > 0) {
       this.fitBounds();
-    }, 100);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['markers'] && this.markers.length > 0) {
+    if (changes['markers'] && this.markers.length > 0 && this.gmap) {
+      console.log('Marcadores actualizados:', this.markers);
+      setTimeout(() => this.fitBounds(), 0);
+    }
+  }
+  updateMapView(): void {
+    if (this.markers.length === 0) {
+      console.warn('No hay marcadores para actualizar la vista del mapa.');
+      return;
+    }
+
+    if (this.markers.length === 1) {
+      this.centerMapOnLastMarker();
+    } else {
       this.fitBounds();
     }
   }
 
   fitBounds(): void {
-    console.log('MapaComponent: Ejecutando fitBounds.');
+    console.log('fitBounds ejecutado con marcadores:', this.markers);
 
-    // Crear un nuevo objeto de límites
-    const bounds = new google.maps.LatLngBounds();
-
-    // Extender los límites con cada marcador válido
-    this.markers.forEach((marker) => {
-      if (marker.lat !== undefined && marker.lng !== undefined) {
-        const latLng = new google.maps.LatLng(marker.lat, marker.lng);
-        bounds.extend(latLng);
-      } else {
-        console.warn(
-          'MapaComponent: Marcador con coordenadas inválidas:',
-          marker
-        );
-      }
-    });
-
-    // Verificar si el mapa está inicializado
-    const currentMap = this.map?.googleMap;
-
-    if (!currentMap) {
-      console.error('MapaComponent: El mapa no está inicializado.');
+    if (!this.gmap) {
+      console.warn('fitBounds: El mapa no está disponible');
       return;
     }
 
-    // Ajustar los límites del mapa para incluir todos los marcadores
-    if (this.markers.length > 0) {
-      console.log('MapaComponent: Ajustando los límites del mapa.');
-      currentMap.fitBounds(bounds);
+    const bounds = new google.maps.LatLngBounds();
+    let validMarkers = 0;
 
-      // Limitar el nivel de zoom máximo para evitar alejar demasiado el mapa
-      const maxZoom = 15; // Ajusta este valor según tus necesidades
-      const listener = google.maps.event.addListener(
-        currentMap,
-        'bounds_changed',
-        () => {
-          const currentZoom = currentMap.getZoom();
-          if (currentZoom !== undefined && currentZoom > maxZoom) {
-            console.log(
-              `MapaComponent: Nivel de zoom demasiado alto (${currentZoom}), ajustando a ${maxZoom}.`
-            );
-            currentMap.setZoom(maxZoom);
-          }
-          google.maps.event.removeListener(listener);
-        }
-      );
-    } else {
-      // Si no hay marcadores, centrar el mapa en Santiago de Chile
-      currentMap.setCenter(this.center);
-      currentMap.setZoom(this.zoom);
+    this.markers.forEach((marker) => {
+      if (marker.lat != null && marker.lng != null) {
+        bounds.extend(new google.maps.LatLng(marker.lat, marker.lng));
+        validMarkers++;
+      } else {
+        console.warn('fitBounds: Marcador inválido:', marker);
+      }
+    });
+
+    if (validMarkers === 0) {
+      console.warn('fitBounds: Sin marcadores válidos');
+      return;
     }
+
+    this.gmap.fitBounds(bounds);
+
+    google.maps.event.addListenerOnce(this.gmap, 'bounds_changed', () => {
+      const currentZoom = this.gmap?.getZoom();
+      if (currentZoom && currentZoom > 15) {
+        console.log(`Ajustando zoom de ${currentZoom} a 15`);
+        this.gmap?.setZoom(15); // Operador opcional para prevenir errores
+      }
+    });
+  }
+
+  centerMapOnLastMarker(): void {
+    if (!this.gmap || this.markers.length === 0) {
+      console.warn(
+        'centerMapOnLastMarker: El mapa no está disponible o no hay marcadores.'
+      );
+      return;
+    }
+
+    const lastMarker = this.markers[this.markers.length - 1];
+    if (!lastMarker) {
+      console.warn('centerMapOnLastMarker: Sin marcadores.');
+      return;
+    }
+
+    console.log('Centrando en último marcador:', lastMarker);
+    this.gmap.setCenter({ lat: lastMarker.lat, lng: lastMarker.lng });
+    this.gmap.setZoom(14);
   }
 }

@@ -3,10 +3,9 @@
     #googleMap
     height="100%"
     width="100%"
-    [center]="center"
-    [zoom]="zoom"
+    [options]="mapOptions"
+    (mapInitialized)="onMapReady($event)"
   >
-    <map-marker *ngFor="let marker of markers" [position]="marker">
-    </map-marker>
+    <map-marker *ngFor="let marker of markers" [position]="marker"></map-marker>
   </google-map>
 </div>
